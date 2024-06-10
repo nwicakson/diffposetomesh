@@ -387,7 +387,7 @@ class Human36M(torch.utils.data.Dataset):
         mean, std = np.mean(joint_img, axis=0), np.std(joint_img, axis=0)
         joint_img = (joint_img.copy() - mean) / std
 
-        if cfg.MODEL.name == 'pose2mesh_net':
+        if cfg.MODEL.name == 'pose2mesh_net' or cfg.MODEL.name == 'diffpose2mesh':
             # default valid
             mesh_valid = np.ones((len(mesh_cam), 1), dtype=np.float32)
             reg_joint_valid = np.ones((len(joint_cam_h36m), 1), dtype=np.float32)

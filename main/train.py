@@ -29,6 +29,9 @@ from core.base import Trainer, Tester, LiftTrainer, LiftTester
 if cfg.MODEL.name == 'pose2mesh_net':
     trainer = Trainer(args, load_dir='')
     tester = Tester(args)  # if not args.debug else None
+if cfg.MODEL.name == 'diffpose2mesh':
+    trainer = Trainer(args, load_dir='')
+    tester = Tester(args)  # if not args.debug else None
 elif cfg.MODEL.name == 'posenet':
     trainer = LiftTrainer(args, load_dir='')
     tester = LiftTester(args)  # if not args.debug else None

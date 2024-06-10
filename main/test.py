@@ -26,6 +26,8 @@ from core.base import Tester, LiftTester
 
 if cfg.MODEL.name == 'pose2mesh_net':
     tester = Tester(args, load_dir=cfg.TEST.weight_path)  # if not args.debug else None
+elif cfg.MODEL.name == 'diffpose2mesh':
+    tester = Tester(args, load_dir=cfg.TEST.weight_path)  # if not args.debug else None
 elif cfg.MODEL.name == 'posenet':
     tester = LiftTester(args, load_dir=cfg.TEST.weight_path)  # if not args.debug else None
 

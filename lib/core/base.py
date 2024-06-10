@@ -55,6 +55,8 @@ def prepare_network(args, load_dir='', is_train=True):
         print(f"==> Preparing {cfg.MODEL.name} MODEL...")
         if cfg.MODEL.name == 'pose2mesh_net':
             model = models.pose2mesh_net.get_model(num_joint=main_dataset.joint_num, graph_L=main_dataset.graph_L)
+        elif cfg.MODEL.name == 'diffpose2mesh':
+            model = models.diffpose2mesh.get_model(num_joint_input_chan=2 + 3, num_mesh_output_chan=3, graph_L=main_dataset.graph_L)
         elif cfg.MODEL.name == 'posenet':
             model = models.posenet.get_model(main_dataset.joint_num, hid_dim=4096, num_layer=2, p_dropout=0.5)
         print('# of model parameters: {}'.format(count_parameters(model)))
