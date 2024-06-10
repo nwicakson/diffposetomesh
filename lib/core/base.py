@@ -10,6 +10,7 @@ from collections import Counter
 
 import Human36M.dataset, SURREAL.dataset, COCO.dataset, PW3D.dataset, AMASS.dataset, MuCo.dataset, FreiHAND.dataset
 import models
+from models.gcndiff import adj_mx_from_edges
 from multiple_datasets import MultipleDatasets
 from core.loss import get_loss
 from core.config import cfg
@@ -50,13 +51,20 @@ def prepare_network(args, load_dir='', is_train=True):
     model, criterion, optimizer, lr_scheduler = None, None, None, None
     loss_history, test_error_history = [], {'surface': [], 'joint': []}
 
+    edges = torch.tensor([[0, 1], [1, 2], [2, 3],
+                            [0, 4], [4, 5], [5, 6],
+                            [0, 7], [7, 8], [8, 9], [9,10],
+                            [8, 11], [11, 12], [12, 13],
+                            [8, 14], [14, 15], [15, 16]], dtype=torch.long)
+    adj = adj_mx_from_edges(num_pts=17, edges=edges, sparse=False)
+
     main_dataset = dataset_list[0]
     if is_train or load_dir:
         print(f"==> Preparing {cfg.MODEL.name} MODEL...")
         if cfg.MODEL.name == 'pose2mesh_net':
             model = models.pose2mesh_net.get_model(num_joint=main_dataset.joint_num, graph_L=main_dataset.graph_L)
         elif cfg.MODEL.name == 'diffpose2mesh':
-            model = models.diffpose2mesh.get_model(num_joint_input_chan=2 + 3, num_mesh_output_chan=3, graph_L=main_dataset.graph_L)
+            model = models.diffpose2mesh.get_model(num_joint=main_dataset.joint_num, graph_L=main_dataset.graph_L, adj=adj)
         elif cfg.MODEL.name == 'posenet':
             model = models.posenet.get_model(main_dataset.joint_num, hid_dim=4096, num_layer=2, p_dropout=0.5)
         print('# of model parameters: {}'.format(count_parameters(model)))

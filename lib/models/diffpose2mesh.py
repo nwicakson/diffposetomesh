@@ -6,11 +6,11 @@ from models import meshnet, posenet, gcndiff
 
 
 class Diffpose2Mesh(nn.Module):
-    def __init__(self, num_joint, graph_L):
+    def __init__(self, num_joint, graph_L, adj, config):
         super(Diffpose2Mesh, self).__init__()
 
         self.num_joint = num_joint
-        self.diffpose = gcndiff
+        self.diffpose = gcndiff(adj)
         self.pose2mesh = meshnet.get_model(num_joint_input_chan=2 + 3, num_mesh_output_chan=3, graph_L=graph_L)
 
     def forward(self, pose2d):

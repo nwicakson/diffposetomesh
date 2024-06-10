@@ -10,6 +10,8 @@ import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from models.ChebConv import ChebConv, _GraphConv, _ResChebGC
 from models.GraFormer import *
+from core.config import cfg as cfg
+from funcs_utils import load_checkpoint
 
 ### the embedding of diffusion timestep ###
 def get_timestep_embedding(timesteps, embedding_dim):
@@ -52,17 +54,15 @@ class _ResChebGC_diff(nn.Module):
         out = self.gconv2(out, self.adj)
         return residual + out
 
-class GCNdiff(nn.Module):
-    def __init__(self, adj, config):
-        super(GCNdiff, self).__init__()
+class gcndiff(nn.Module):
+    def __init__(self, adj, pretrained=False):
+        super(gcndiff, self).__init__()
         
         self.adj = adj
-        self.config = config
         ### load gcn configuration ###
-        con_gcn = config.model
         self.hid_dim, self.emd_dim, self.coords_dim, num_layers, n_head, dropout, n_pts = \
-            con_gcn.hid_dim, con_gcn.emd_dim, con_gcn.coords_dim, \
-                con_gcn.num_layer, con_gcn.n_head, con_gcn.dropout, con_gcn.n_pts
+            96, 96, [5,5], \
+                5, 4, 0.25, 17
                 
         self.hid_dim = self.hid_dim
         self.emd_dim = self.hid_dim*4
@@ -96,6 +96,9 @@ class GCNdiff(nn.Module):
             torch.nn.Linear(self.emd_dim,self.emd_dim),
         ])
 
+        if pretrained:
+            self._load_pretrained_model()
+
     def forward(self, x, mask, t, cemd):
         # timestep embedding
         temb = get_timestep_embedding(t, self.hid_dim)
@@ -109,3 +112,8 @@ class GCNdiff(nn.Module):
             out = self.gconv_layers[i](out, temb)
         out = self.gconv_output(out, self.adj)
         return out
+    
+    def _load_pretrained_model(self):
+        print("Loading pretrained diffpose...")
+        checkpoint = load_checkpoint(load_dir=cfg.MODEL.posenet_path, pick_best=True)
+        self.load_state_dict(checkpoint['model_state_dict'])
